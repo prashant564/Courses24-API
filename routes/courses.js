@@ -10,6 +10,8 @@ const {
   deleteCourse,
 } = require('../controllers/courses');
 
+const { protect, authorizeRoles } = require('../middleware/auth');
+
 const Course = require('../models/Course');
 const advancedResults = require('../middleware/advancedResults');
 
@@ -19,8 +21,12 @@ router
     advancedResults(Course, { path: 'bootcamp', select: 'name description' }),
     getCourses
   )
-  .post(addCourse);
+  .post(protect, authorizeRoles('publisher', 'admin'), addCourse);
 
-router.route('/:id').get(getCourse).put(updateCourse).delete(deleteCourse);
+router
+  .route('/:id')
+  .get(getCourse)
+  .put(protect, authorizeRoles('publisher', 'admin'), updateCourse)
+  .delete(protect, authorizeRoles('publisher', 'admin'), deleteCourse);
 
 module.exports = router;
