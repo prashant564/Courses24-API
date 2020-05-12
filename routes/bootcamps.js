@@ -11,16 +11,17 @@ const {
   getBootcampsInRadius,
 } = require('../controllers/bootcamps');
 
-const { protect, authorizeRoles } = require('../middleware/auth');
-
 const Bootcamp = require('../models/Bootcamp');
 const advancedResults = require('../middleware/advancedResults');
+const { protect, authorizeRoles } = require('../middleware/auth');
 
 // Include other resource routers
 const courseRouter = require('./courses');
+const reviewRouter = require('./reviews');
 
 // Re-route into other resource routers
 router.use('/:bootcampId/courses', courseRouter);
+router.use('/:bootcampId/reviews', reviewRouter);
 
 router
   .route('/')
