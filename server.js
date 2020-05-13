@@ -3,6 +3,12 @@ const dotenv = require('dotenv');
 const morgan = require('morgan');
 const colors = require('colors');
 const cookieParser = require('cookie-parser');
+const mongoSanitize = require('express-mongo-sanitize');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
+const hpp = require('hpp');
+const cors = require('cors');
+const xssClean = require('xss-clean');
 const errorHandler = require('./middleware/error');
 const connectDB = require('./config/db');
 
@@ -31,6 +37,29 @@ app.use(cookieParser());
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
 }
+
+// Sanitize data
+app.use(mongoSanitize());
+
+// Set security header
+app.use(helmet());
+
+// Prevent cross site scripting (xss) attacks
+app.use(xssClean());
+
+// Rate Limiting
+const limiter = rateLimit({
+  windowMs: 10 * 60 * 1000, // 10 minutes
+  max: 100, // limit each IP to 100 requests per windowMs
+});
+//  apply to all requests
+app.use(limiter);
+
+// Prevent HTTP param pollution
+app.use(hpp());
+
+// Enable CORS
+app.use(cors());
 
 // Mount routers
 app.use('/api/v1/bootcamps', bootcamps);
